@@ -101,9 +101,8 @@ opt.feedback.name  = 'IntentionBeep';
 opt.feedback.block_name = {'Phase1_practice','Phase1','Phase2_practice','Phase2','Phase3_practive','Phase3'};
 record_audio = [            0                 0        1                 1        1                 1];
 make_interruptions = [      0                 0        1                 1        1                 1];
-delayed_prompts = [         0                 0        0                 0        1                 1];
-% 1 - pedal press, 4 - seconds
-end_pause_counter_type = [  1                 1        4                 4        4                 4];
+delayed_prompts = [         0                 0        delayed(1)        delayed(1) delayed(2)      delayed(2)];
+end_pause_counter_type = [  1                 1        4                 4        4                 4]; % 1 - pedal press, 4 - seconds
 end_after_x_events = [      5                 100      1*60              60*60    1*60              60*60];
 pause_every_x_events = [    10                20       1*60              10*60    1*60              10*60];
 bci_delayed_idle =     [    0                 0        0                 1        0                 1];
@@ -125,7 +124,7 @@ for ii = 1:length(opt.feedback.block_name)
         opt.feedback.pyff_params(ii).trial_assignment = int16(trial_assignment{ii});
     end    
 end
-clear trial_assignment fv_ivals Wps Ws n record_audio save_opt listen_to_keyboard make_interruptions end_after_x_events end_pause_counter_type pause_every_x_events bci_delayed_idle ii delayed_prompts
+clear trial_assignment fv_ivals Wps Ws n record_audio save_opt listen_to_keyboard make_interruptions end_after_x_events end_pause_counter_type pause_every_x_events bci_delayed_idle ii delayed_prompts delayed
 
 
 

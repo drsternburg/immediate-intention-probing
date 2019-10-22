@@ -1,4 +1,6 @@
 
+delayed = [1 0];
+iip_setupEnvironment;
 global opt
 
 %% setup participant
