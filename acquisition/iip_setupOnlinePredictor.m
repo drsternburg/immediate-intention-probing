@@ -4,26 +4,26 @@ function iip_setupOnlinePredictor(subj_code)
 global opt
 
 %% load and prepare data
-[mrk,cnt,mnt] = iip_loadData(subj_code,'Phase1');
+[cnt,mrk,mnt] = proc_loadDataset(subj_code,'Phase1');
 cnt = proc_commonAverageReference(cnt);
 cnt = proc_selectChannels(cnt,opt.cfy_rp.clab_base);
-trial_mrk = iip_getTrialMarkers(mrk);
-trial_mrk = trial_mrk(cellfun(@length,trial_mrk)==4);
+must_contain = 'movement onset';
+trial_mrk = mrk_getTrialMarkers(mrk,must_contain);
 mrk = mrk_selectEvents(mrk,[trial_mrk{:}]);
 
 %% Exclude too short waiting times
-mrk_mo = mrk_selectClasses(mrk, 'movement onset');
-mrk_ts = mrk_selectClasses(mrk, 'trial start');
+mrk_mo = mrk_selectClasses(mrk,'movement onset');
+mrk_ts = mrk_selectClasses(mrk,'trial start');
 t_ts2mo = mrk_mo.time - mrk_ts.time;
 ind_valid = t_ts2mo>=-opt.cfy_rp.fv_window(1);
-mrk = mrk_mergeMarkers(mrk_selectEvents(mrk_ts, ind_valid),...
-                       mrk_selectEvents(mrk_mo, ind_valid));
-t_ts2mo = t_ts2m0(ind_valid);
+trial_mrk = mrk_getTrialMarkers(mrk);
+mrk = mrk_selectEvents(mrk,[trial_mrk{ind_valid}]);
+t_ts2mo = t_ts2mo(ind_valid);
 
 %% get amplitudes
 mrk_ = mrk_selectClasses(mrk,{'trial start','movement onset'});
 epo = proc_segmentation(cnt,mrk_,opt.cfy_rp.fv_window);
-epo = proc_baseline(epo,opt.cfy_rp.ival_baseln);
+epo = proc_baseline(epo,opt.cfy_rp.baseln_len,opt.cfy_rp.baseln_pos);
 rsq = proc_rSquareSigned(epo);
 amp = proc_meanAcrossTime(epo,opt.cfy_rp.ival_amp);
 
@@ -37,8 +37,8 @@ grid_addBars(rsq,'HScale',H.scale,'Height',1/7);
 [~,pval2] = ttest2(squeeze(amp.x(1,:,logical(amp.y(2,:))))',...
     squeeze(amp.x(1,:,logical(amp.y(1,:))))',...
     'tail','left'); % RP amplitudes must be smaller than No-RP amplitudes
-chanind_sel = epo.clab(pval1<.05&pval2<.05);
-opt.cfy_rp.clab = epo_.clab(chanind_sel);
+chanind_sel = pval1<.05&pval2<.05;
+opt.cfy_rp.clab = epo.clab(chanind_sel);
 fprintf('\nSelected channels:\n')
 fprintf('%s\n',opt.cfy_rp.clab{:})
 
@@ -51,13 +51,12 @@ opt.acq.A(rc,rrc) = opt.acq.A(rc,rrc) - 1/length(rc);
 opt.acq.A = opt.acq.A(:,rrc);
 
 %% re-load data and apply online filter
-[~,cnt] = iip_loadData(subj_code,'Phase1');
+cnt = proc_loadDataset(subj_code,'Phase1');
 cnt = proc_linearDerivation(cnt,opt.acq.A);
 
 %% train classifier and assess accuracy
-cnt = proc_selectChannels(cnt,opt.cfy_rp.clab);
 fv = proc_segmentation(cnt,mrk,opt.cfy_rp.fv_window);
-fv = proc_baseline(fv,opt.cfy_rp.ival_baseln);
+fv = proc_baseline(fv,opt.cfy_rp.baseln_len,opt.cfy_rp.baseln_pos);
 fv = proc_jumpingMeans(fv,opt.cfy_rp.ival_fv);
 fv = proc_flaten(fv);
 
@@ -69,8 +68,9 @@ warning on
 fprintf('\nClassification accuracy: %2.1f%%\n',100*(1-loss))
 
 %% sliding classifier output
-mrk_ = mrk_selectClasses(mrk,{'trial start','EMG onset','trial end'});
-cout = proc_slidingClassification(cnt,mrk_);
+mrk_ = mrk_selectClasses(mrk,{'trial start','movement onset','trial end'});
+opt2 = struct('ivals_fv',opt.cfy_rp.ival_fv,'baseln_len',opt.cfy_rp.baseln_len,'baseln_pos',opt.cfy_rp.baseln_pos);
+cout = proc_slidingClassification(cnt,mrk_,opt2);
 
 %% define threshold
 [R,thresh] = iip_selectThreshold(cout);

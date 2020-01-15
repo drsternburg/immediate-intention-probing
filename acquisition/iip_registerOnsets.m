@@ -24,8 +24,8 @@ dt = 1000/cnt.fs;
 
 %% train online detector
 mrk_train = mrk;
-mrk_train.time(logical(mrk.y(1,:))) = mrk_train.time(logical(mrk_train.y(1,:)))+opt.acc.offset;
-fv = proc_segmentation(cnt,mrk_train,opt.acc.ival);
+mrk_train.time(logical(mrk.y(1,:))) = mrk_train.time(logical(mrk_train.y(1,:)))+opt.cfy_acc.offset;
+fv = proc_segmentation(cnt,mrk_train,opt.cfy_acc.ival_fv);
 fv = proc_variance(fv);
 fv = proc_logarithm(fv);
 fv = proc_flaten(fv);
@@ -40,18 +40,18 @@ for jj = 1:Nt
     
     i_trial_ = i_trial(:,setdiff(1:Nt,jj));
     mrk_train = mrk_selectEvents(mrk,i_trial_(:));
-    mrk_train.time(logical(mrk_train.y(1,:))) = mrk_train.time(logical(mrk_train.y(1,:)))+opt.acc.offset; 
-    fv = proc_segmentation(cnt,mrk_train,opt.acc.ival);
+    mrk_train.time(logical(mrk_train.y(1,:))) = mrk_train.time(logical(mrk_train.y(1,:)))+opt.cfy_acc.offset; 
+    fv = proc_segmentation(cnt,mrk_train,opt.cfy_acc.ival_fv);
     fv = proc_variance(fv);
     fv = proc_logarithm(fv);
     fv = proc_flaten(fv);
     C = train_RLDAshrink(fv.x,fv.y);
     
     mrk_trial = mrk_selectEvents(mrk,i_trial(:,jj));
-    T = [mrk_trial.time(1)+opt.acc.offset mrk_trial.time(2)];
+    T = [mrk_trial.time(1)+opt.cfy_acc.offset mrk_trial.time(2)];
     t = T(2);
     while t >=T(1)
-        fv = proc_segmentation(cnt,t,opt.acc.ival);
+        fv = proc_segmentation(cnt,t,opt.cfy_acc.ival_fv);
         fv = proc_variance(fv);
         fv = proc_logarithm(fv);
         fv = proc_flaten(fv);
@@ -118,8 +118,9 @@ end
 ds_list = dir(BTB.MatDir);
 ds_idx = strncmp(subj_code,{ds_list.name},5);
 ds_name = ds_list(ds_idx).name;
-filename = sprintf('%s%s/%s_%s_%s_mrk',BTB.MatDir,ds_name,opt.session_name,phase_name,subj_code);
-save(filename,'mrk')
+filename = fullfile(ds_name,sprintf('%s_%s_%s',opt.session_name,phase_name,subj_code));
+filename = fullfile(BTB.MatDir,[filename '_mrk']);
+%save(filename,'mrk')
 
 
 

@@ -16,9 +16,8 @@ iip_startRecording('Phase1_practice')
 iip_startRecording('Phase1')
 
 %% Preprocess & setup online predictor
-iip_convertBVData(BTB.Tp.Code,'Phase1',0);
-iip_initialCleanup(BTB.Tp.Code,'Phase1');
-iip_registerOnsets(BTB.Tp.Code,'Phase1');
+proc_convertBVData(BTB.Tp.Code,'Phase1',0);
+proc_regTrainAccelOnsets(BTB.Tp.Code,'Phase1');
 iip_setupOnlinePredictor(BTB.Tp.Code,'Phase1');
 save([fullfile(BTB.Tp.Dir,opt.session_name) '_' BTB.Tp.Code '_opt'],'opt')
 

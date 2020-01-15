@@ -14,7 +14,7 @@ else
     fprintf('Performing basic cleanup for dataset %s|%s.\n',subj_code,phase_name)
 end
 
-mrk = rfb_loadData(subj_code,phase_name);
+mrk = iip_loadData(subj_code,phase_name);
 
 % remove trailing BPs (double or multiple successive BPs, happens sometimes)
 ci_bp = find(strcmp(mrk.className,'pedal press'));

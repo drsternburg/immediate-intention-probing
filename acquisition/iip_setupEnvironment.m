@@ -16,7 +16,7 @@ BTB.Acq.Geometry = [1281 1 1280 998];
 BTB.Acq.Dir = fullfile(BTB.PrivateDir,'immediate-intention-probing','acquisition');
 BTB.Acq.IoAddr = hex2dec('0378');
 BTB.PyffDir = 'C:\bbci\pyff\src';
-BTB.Acq.Prefix = 'f';
+BTB.Acq.Prefix = 'i';
 BTB.Acq.StartLetter = 'a';
 BTB.FigPos = [1 1];
 
@@ -41,10 +41,6 @@ opt.mrk.def = { 2 'pedal press';...
                -11 'trial end'
                }';
 
-%% parameters for finding movement onsets (accelerator)
-opt.acc.ival = [-200 0];
-opt.acc.offset = 500;
-
 %% parameters for classification
 opt.cfy_rp.clab_base = {'F1','Fz','F2',...
                         'FC3','FC1','FC2','FC4'...
@@ -60,7 +56,8 @@ opt.acq.A = eye(Nc,Nc);
 opt.acq.A(rc,rrc) = opt.acq.A(rc,rrc) - 1/length(rc);
 opt.acq.A = opt.acq.A(:,rrc);
 
-opt.cfy_rp.ival_baseln = [-1500 -1400];
+opt.cfy_rp.baseln_len = 100;
+opt.cfy_rp.baseln_pos = 'beginning';
 opt.cfy_rp.ival_fv = [-1500 -1400;
                       -1400 -1300;
                       -1300 -1200;
@@ -76,14 +73,15 @@ opt.cfy_rp.ival_fv = [-1500 -1400;
                        -300 -200;
                        -200 -100;
                        -100   0];
-opt.cfy_rp.fv_window = [opt.cfy_rp.ival_fv(1)-10 0];
+opt.cfy_rp.fv_window = [opt.cfy_rp.ival_fv(1) 0];
 
 opt.cfy_rp.ival_amp = [-200 0];
 
 opt.cfy_acc.clab = {'Acc*'};
-opt.cfy_acc.ival_fv = opt.acc.ival;
+opt.cfy_acc.ival_fv = [-200 0];
+opt.cfy_acc.offset = 500;
 
-% for the fake classifier of phase 1:
+% fake classifiers of phase 1:
 opt.cfy_rp.C.gamma = randn;
 opt.cfy_rp.C.b = randn;
 opt.cfy_rp.C.w = randn(size(opt.cfy_rp.ival_fv,1)*length(opt.cfy_rp.clab),1);
