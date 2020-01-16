@@ -50,7 +50,7 @@ class IntentionBeep(PygameFeedback):
         self.char_color = [0,0,0]
         
         self.prompt_text = 'Were you about to press?'
-        self.pause_text = 'Pause. Press pedal to continue...'
+        self.pause_text = 'Paused. Press pedal to continue...'
         self.paused = True
         self.on_trial = False
         
@@ -60,15 +60,15 @@ class IntentionBeep(PygameFeedback):
         self.duration_cross = 2500
         self.min_waittime = 1500
         
-        self.marker_keyboard_press = 199
-        self.marker_quit = 255
-        self.marker_base_start = 10
-        self.marker_base_interruption = 20
-        self.marker_trial_end = 30
+        self.marker_keyboard_press = 255-199
+        self.marker_quit = 255-255
+        self.marker_base_start = 255-10
+        self.marker_base_interruption = 255-20
+        self.marker_trial_end = 255-30
         
-        self.marker_identifier = {20 : 'beep move silent',
-                                  21 : 'beep move',
-                                  22 : 'beep idle'}
+        self.marker_identifier = {self.marker_base_interruption : 'beep move silent',
+                                  self.marker_base_interruption+1 : 'beep move',
+                                  self.marker_base_interruption+2 : 'beep idle'}
         
         ########################################################################
         # MAIN PARAMETERS TO BE SET IN MATLAB
@@ -164,7 +164,7 @@ class IntentionBeep(PygameFeedback):
                     self.time_trial_start = float('infinity')
             # for testing purposes and/or interrupting without listening to classifier
             if not self.bci_delayed_idle:
-                if self.on_trial and not self.already_interrupted and not self.already_pressed and self.make_interruptions:
+                if self.on_trial and not self.already_interrupted and not self.already_pressed and not self.already_moved and self.make_interruptions:
                     if self.this_trial_type==2 and now > self.this_start_time + self.this_idle_waittime:
                         self.do_interruption()
             # update spot
@@ -210,7 +210,7 @@ class IntentionBeep(PygameFeedback):
                     if self.this_trial_type==1: # MOVE interruption
                         self.do_interruption()
                         self.move_counter += 1
-                    if self.this_trial_type==2 and self.last_cl_output<1: # silent MOVE interruption
+                    if self.this_trial_type==2 and self.last_cl_output<1: # silent MOVE interruption, only at cout changes from -1 to 1
                         self.send_parallel_log(self.marker_base_interruption)
             if data['cl_output']==10 and not self.already_pressed:
                 self.pedal_press()
