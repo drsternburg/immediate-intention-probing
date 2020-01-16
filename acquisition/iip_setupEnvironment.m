@@ -8,7 +8,7 @@ opt.session_name = 'IntentionProbing';
 if ispc
     BTB.PrivateDir = 'C:\bbci';
 end
-addpath(fullfile(BTB.PrivateDir,'immediate-intention-probing','functions'))
+addpath(fullfile(BTB.PrivateDir,'toolbox_msk'))
 addpath(fullfile(BTB.PrivateDir,'immediate-intention-probing','acquisition'))
 
 %%
