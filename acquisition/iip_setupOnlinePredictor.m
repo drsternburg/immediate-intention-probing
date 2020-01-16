@@ -73,16 +73,13 @@ opt2 = struct('ivals_fv',opt.cfy_rp.ival_fv,'baseln_len',opt.cfy_rp.baseln_len,'
 cout = proc_slidingClassification(cnt,mrk_,opt2);
 
 %% define threshold
-[R,thresh] = iip_selectThreshold(cout);
+[R,thresh_pos,thresh_neg] = iip_selectThreshold(cout);
 
-%% either terminate experiment, or draw No-RP probe times
-if isempty(R)
-    return
-else
-    opt.pred.cout_thresh = thresh;
-    for jj = 3:6
-        opt.feedback.pyff_params(jj).ir_idle_waittime = iip_drawNoRPProbeTimes(1000,t_ts2mo,sum(R)*100);
-    end
+opt.pred.thresh_pos = thresh_pos;
+opt.pred.thresh_neg = thresh_neg;
+
+for jj = 3:6
+    opt.feedback.pyff_params(jj).ir_idle_waittime = iip_drawNoRPProbeTimes(1000,t_ts2mo,sum(R)*100);
 end
 
 

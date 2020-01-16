@@ -1,5 +1,5 @@
 
-function [P,Fmax,thresh_move] = iip_findCoutThresh(C,b)
+function [P,Fmax,thresh_move,thresh_idle] = iip_findCoutThresh(C,b)
 
 %% define possible threshold range
 x_all = cellfun(@(f)getfield(f,'x'),C,'UniformOutput',false);
@@ -34,3 +34,5 @@ F = smooth(F,10);
 
 P = P(ind,:);
 thresh_move = thresh(ind);
+
+thresh_idle = median(x_all);

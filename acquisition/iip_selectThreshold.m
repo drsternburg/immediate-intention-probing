@@ -1,12 +1,12 @@
 
-function [Rsel,thresh] = iip_selectThreshold(cout)
+function [Rsel,thresh_pos,thresh_neg] = iip_selectThreshold(cout)
 
 %cout = COUT{19};
 
 figure, hold on
 clrs = lines;
 
-[R2,~,thresh2] = iip_findCoutThresh(cout,1/2);
+[R2,~,thresh2,thresh_neg] = iip_findCoutThresh(cout,1/2);
 [R3,~,thresh3] = iip_findCoutThresh(cout,1/3);
 R = [R2([2 1]) sum(R2(1:2)) R3([2 1]) sum(R3(1:2))];
 
@@ -22,34 +22,34 @@ set(gca,'ylim',[0 1],'xlim',[0 7.5],'ygrid','on','xtick',xpos,'xticklabel',{'HIT
 
 if all(R([1 4])<=.1)
     fprintf('All HIT rates <.1 ==> STOP\n')
-    thresh = NaN;
+    thresh_pos = NaN;
     Rsel = [];
     return
 end
 if all([R(2)/R(1) R(5)/R(4)]>=2.99)
     fprintf('All FA rates 3-fold higher than HIT rates ==> STOP\n')
-    thresh = NaN;
+    thresh_pos = NaN;
     Rsel = [];
     return
 end
 if R(6)<.25
     fprintf('Beta=3 PRB rate <.25 ==> Beta=2\n')
-    thresh = thresh2;
+    thresh_pos = thresh2;
     Rsel = R([1 2]);
     return
 end
 if diff(R([2 5]))/diff(R([1 4]))>=2.99
     if R(4)<=.1
-        thresh = thresh2;
+        thresh_pos = thresh2;
         Rsel = R([1 2]);
         fprintf('==> Beta=2\n')
         return
     end
-    thresh = thresh3;
+    thresh_pos = thresh3;
     Rsel = R([4 5]);
     fprintf('Change in FA more than 3-fold compared to change in HIT ==> Beta=3\n')
     return
 end
-thresh = thresh2;
+thresh_pos = thresh2;
 Rsel = R([1 2]);
 fprintf('==> Beta=2\n')

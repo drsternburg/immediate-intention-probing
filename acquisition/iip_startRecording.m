@@ -9,7 +9,7 @@ bbci = iip_bbci_setup;
 id = logical(strcmp(opt.feedback.block_name,block_name));
 
 if opt.feedback.rec_params(id).record_audio
-    mp3file = sprintf('%s\\%s_%s.mp3',BTB.Tp.Dir,BTB.Tp.Code,opt.feedback.blocks{id});
+    mp3file = sprintf('%s\\%s_%s.mp3',BTB.Tp.Dir,BTB.Tp.Code,opt.feedback.block_name{id});
     ix = 1;
     while 1
         if not(exist(mp3file,'file'))
