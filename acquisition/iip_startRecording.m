@@ -6,7 +6,7 @@ global BTB opt
 
 bbci = iip_bbci_setup;
 
-id = logical(strcmp(opt.feedback.blocks,block_name));
+id = logical(strcmp(opt.feedback.block_name,block_name));
 
 if opt.feedback.rec_params(id).record_audio
     mp3file = sprintf('%s\\%s_%s.mp3',BTB.Tp.Dir,BTB.Tp.Code,opt.feedback.blocks{id});
@@ -26,7 +26,7 @@ pyff('startup'); pause(1)
 pyff('init',opt.feedback.name); pause(5);
 pyff('set',opt.feedback.pyff_params(id))
 
-basename = sprintf('%s_%s_',opt.session_name,opt.feedback.blocks{id});
+basename = sprintf('%s_%s_',opt.session_name,opt.feedback.block_name{id});
 bbci_acquire_bv('close');
 pyff('play','basename',basename,'impedances',0);
 bbci_apply(bbci);

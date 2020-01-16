@@ -14,31 +14,39 @@ addpath(fullfile(BTB.PrivateDir,'immediate-intention-probing','acquisition'))
 %%
 BTB.Acq.Geometry = [1281 1 1280 998];
 BTB.Acq.Dir = fullfile(BTB.PrivateDir,'immediate-intention-probing','acquisition');
-BTB.Acq.IoAddr = hex2dec('0378');
+BTB.Acq.IoAddr = hex2dec('3EFC');
 BTB.PyffDir = 'C:\bbci\pyff\src';
 BTB.Acq.Prefix = 'i';
 BTB.Acq.StartLetter = 'a';
 BTB.FigPos = [1 1];
 
 %% parameters for raw data
-opt.acq.bv_workspace = 'C:\Vision\Workfiles\ReadinessFeedback';
 opt.acq.orig_fs = 1000;
 Wps = [42 49]/opt.acq.orig_fs*2;
 [n,Ws] = cheb2ord(Wps(1),Wps(2),3,40);
 [opt.acq.filt.b,opt.acq.filt.a] = cheby2(n,50,Ws);
 opt.acq.fs = 100;
-opt.acq.clab = {'F3','F4','C3','C4','P3','P4','O1','O2','P7','P8',...
-                'Fz','Cz','Pz','Oz','FC1','FC2','CP1','CP2','FC5','FC6',...
-                'CP5','CP6','F1','F2','C1','C2','P1','P2','AF3','AF4',...
-                'FC3','FC4','CP3','CP4','PO3','PO4','F5','F6','C5','C6',...
-                'P5','P6','AF7','AF8','FT7','FT8','TP7','TP8','Fpz','POz',...
-                'CPz','Acc_x','Acc_y','Acc_z'};
+opt.acq.clab = {'Fp1','Fp2',...
+                'AF7','AF3','AFz','AF4','AF8',...
+                'F7','F5','F3','F1','Fz','F2','F4','F6','F8',...
+                'FT9','FT7','FC5','FC3','FC1','FC2','FC4','FC6','FT8','FT10'...
+                'T7','C5','C3','C1','Cz','C2','C4','C6','T8',...
+                'TP9','TP7','CP5','CP3','CP1','CPz','CP2','CP4','CP6','TP8','TP10'...
+                'P7','P5','P3','P1','Pz','P2','P4','P6','P8',...
+                'PO7','PO3','POz','PO4','PO8',...
+                'O1','Oz','O2',...
+                'X','Y','Z'
+                };
 
 %% markers
-opt.mrk.def = { 2 'pedal press';...
-               -30 'feedback'; ...
+opt.mrk.def = { -2 'pedal press';...
+               -30 'trial end'; ...
                -10 'trial start';...
-               -11 'trial end'
+               -11 'trial start move';...
+               -12 'trial start idle';...
+               -20 'beep silent';...
+               -21 'beep move';...
+               -22 'beep idle'
                }';
 
 %% parameters for classification
@@ -58,10 +66,7 @@ opt.acq.A = opt.acq.A(:,rrc);
 
 opt.cfy_rp.baseln_len = 100;
 opt.cfy_rp.baseln_pos = 'beginning';
-opt.cfy_rp.ival_fv = [-1500 -1400;
-                      -1400 -1300;
-                      -1300 -1200;
-                      -1200 -1100;
+opt.cfy_rp.ival_fv = [-1200 -1100;
                       -1100 -1000;
                       -1000 -900;
                        -900 -800;
@@ -77,7 +82,7 @@ opt.cfy_rp.fv_window = [opt.cfy_rp.ival_fv(1) 0];
 
 opt.cfy_rp.ival_amp = [-200 0];
 
-opt.cfy_acc.clab = {'Acc*'};
+opt.cfy_acc.clab = {'X','Y','Z'};
 opt.cfy_acc.ival_fv = [-200 0];
 opt.cfy_acc.offset = 500;
 
@@ -92,17 +97,29 @@ opt.cfy_acc.C.w = randn(3,1);
 
 %% parameters for finding optimal prediction threshold
 opt.pred.tp_ival = [-500 0];
-opt.pred.cout_thresh = 10; % for the fake classifier of phase 1
+opt.pred.thresh_pos = 10; % for the fake classifier of phase 1
+opt.pred.thresh_neg = -10; % for the fake classifier of phase 1
 
 %% feedback parameters
 opt.feedback.name  = 'IntentionBeep';
 opt.feedback.block_name = {'Phase1_practice','Phase1','Phase2_practice','Phase2','Phase3_practive','Phase3'};
+% record_audio = [            0                 0        1                 1        1                 1];
+% make_interruptions = [      0                 0        1                 1        1                 1];
+% delayed_prompts = [         0                 0        delayed(1)        delayed(1) delayed(2)      delayed(2)];
+% end_pause_counter_type = [  1                 1        4                 4        4                 4]; % 1 - pedal press, 4 - seconds
+% end_after_x_events = [      5                 100      1*60              60*60    1*60              60*60];
+% pause_every_x_events = [    10                20       1*60              10*60    1*60              10*60];
+% bci_delayed_idle =     [    0                 0        0                 1        0                 1];
+% trial_assignment = {        1                 1        iip_drawTrialAssignments(100,[0 .5]) ...
+%                                                                          iip_drawTrialAssignments(1500,[.5 .5])...
+%                                                                                   iip_drawTrialAssignments(100,[0 .5]) ...
+%                                                                                                     iip_drawTrialAssignments(1500,[.5 .5])};
 record_audio = [            0                 0        1                 1        1                 1];
 make_interruptions = [      0                 0        1                 1        1                 1];
 delayed_prompts = [         0                 0        delayed(1)        delayed(1) delayed(2)      delayed(2)];
-end_pause_counter_type = [  1                 1        4                 4        4                 4]; % 1 - pedal press, 4 - seconds
-end_after_x_events = [      5                 100      1*60              60*60    1*60              60*60];
-pause_every_x_events = [    10                20       1*60              10*60    1*60              10*60];
+end_pause_counter_type = [  1                 1        4                 1        4                 4]; % 1 - pedal press, 4 - seconds
+end_after_x_events = [      5                 4      1*60               10    1*60              60*60];
+pause_every_x_events = [    10                2       1*60               5    1*60              10*60];
 bci_delayed_idle =     [    0                 0        0                 1        0                 1];
 trial_assignment = {        1                 1        iip_drawTrialAssignments(100,[0 .5]) ...
                                                                          iip_drawTrialAssignments(1500,[.5 .5])...

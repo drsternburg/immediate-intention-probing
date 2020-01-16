@@ -6,7 +6,6 @@ global opt
 %% load and prepare data
 [cnt,mrk,mnt] = proc_loadDataset(subj_code,'Phase1');
 cnt = proc_commonAverageReference(cnt);
-cnt = proc_selectChannels(cnt,opt.cfy_rp.clab_base);
 must_contain = 'movement onset';
 trial_mrk = mrk_getTrialMarkers(mrk,must_contain);
 mrk = mrk_selectEvents(mrk,[trial_mrk{:}]);
@@ -33,6 +32,7 @@ H = grid_plot(epo,mnt,'PlotStat','sem');%,'ShrinkAxes',[.9 .9]);
 grid_addBars(rsq,'HScale',H.scale,'Height',1/7);
 
 %% channel selection
+amp = proc_selectChannels(amp,opt.cfy_rp.clab_base);
 [~,pval1] = ttest(squeeze(amp.x(1,:,logical(amp.y(2,:))))',0,'tail','left'); % RP amplitudes must be smaller than zero
 [~,pval2] = ttest2(squeeze(amp.x(1,:,logical(amp.y(2,:))))',...
     squeeze(amp.x(1,:,logical(amp.y(1,:))))',...

@@ -6,9 +6,6 @@ global opt
 %% setup participant
 acq_makeDataFolder;
 
-%% Test the triggers
-bbci_trigger_parport(10,BTB.Acq.IoLib,BTB.Acq.IoAddr);
-
 %% Practicing Phase 1
 iip_startRecording('Phase1_practice')
 
@@ -18,7 +15,7 @@ iip_startRecording('Phase1')
 %% Preprocess & setup online predictor
 proc_convertBVData(BTB.Tp.Code,'Phase1',0);
 proc_regTrainAccelOnsets(BTB.Tp.Code,'Phase1');
-iip_setupOnlinePredictor(BTB.Tp.Code,'Phase1');
+iip_setupOnlinePredictor(BTB.Tp.Code);
 save([fullfile(BTB.Tp.Dir,opt.session_name) '_' BTB.Tp.Code '_opt'],'opt')
 
 %% Practicing Phase 2

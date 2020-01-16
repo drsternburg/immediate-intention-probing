@@ -35,8 +35,8 @@ class IntentionBeep(PygameFeedback):
         self.FPS = 200
         #self.screenPos = [1280, 0]
         #self.screenSize = [1280, 1024]
-        self.screenPos=[900,0]
-        self.screenSize=[1920,1080]
+        self.screenPos = [0, 0]
+        self.screenSize = [1280, 1024]
         self.screen_center = [self.screenSize[0]/2,self.screenSize[1]/2]
         self.caption = "IntentionBeep"
         
@@ -80,13 +80,14 @@ class IntentionBeep(PygameFeedback):
         self.end_pause_counter_type = 1 # 1 - button presses, 2 - move lights, 3 - idle lights, 4 - seconds
         self.bci_delayed_idle = 0
         self.trial_assignment = [2,2,2,2,2,2,2] # 1 - move, 2 - idle
-        self.ir_idle_waittime = [1000.0,1000.0,1000.0,1000.0,1000.0,1000.0,1000.0]
+        self.ir_idle_waittime = [3000.0,3000.0,3000.0,3000.0,3000.0,3000.0,3000.0]
         
         ########################################################################  
 
 
     def pre_mainloop(self):
         PygameFeedback.pre_mainloop(self)
+        self.send_parallel(255) # reset all pins to on
         self.font_text = pygame.font.Font(None, self.text_fontsize)
         self.font_char = pygame.font.Font(None, self.char_fontsize)
         self.trial_counter = 0
@@ -130,7 +131,7 @@ class IntentionBeep(PygameFeedback):
         self.log('Starting block '+str(self.block_counter+1))
         now = pygame.time.get_ticks()
         self.paused = False
-        self.time_trial_end = now
+        self.time_trial_start = now + self.duration_cross
         self.trial_counter -= 1 # ugly hack
 
 
@@ -199,25 +200,28 @@ class IntentionBeep(PygameFeedback):
     def on_control_event(self,data):
         if self.on_trial:
             now = pygame.time.get_ticks()
-            if data['accel_output']==1 and not self.already_moved:
+            if u'accel' in data and data[u'accel']==1 and not self.already_moved:
                 self.already_moved = True
-            if data['cl_output']==-1 and not self.already_interrupted and not self.already_pressed and not self.already_moved and self.make_interruptions and self.bci_delayed_idle:
+            if u'cl_output' in data and data[u'cl_output']==-1 and not self.already_interrupted and not self.already_pressed and not self.already_moved and self.make_interruptions and self.bci_delayed_idle:
                 if self.this_trial_type==2 and now > self.this_start_time + self.this_idle_waittime:
                     self.do_interruption()
                     self.idle_counter += 1
-            if data['cl_output']==1 and not self.already_interrupted and not self.already_pressed and not self.already_moved and self.make_interruptions:
+            if u'cl_output' in data and data[u'cl_output']==1 and not self.already_interrupted and not self.already_pressed and not self.already_moved and self.make_interruptions:
                 if now > self.this_start_time + self.min_waittime:
                     if self.this_trial_type==1: # MOVE interruption
                         self.do_interruption()
                         self.move_counter += 1
                     if self.this_trial_type==2 and self.last_cl_output<1: # silent MOVE interruption, only at cout changes from -1 to 1
                         self.send_parallel_log(self.marker_base_interruption)
-            if data['cl_output']==10 and not self.already_pressed:
-                self.pedal_press()
-            self.last_cl_output = data['cl_output']
+            if u'pedal' in data:
+                if data[u'pedal']==1 and not self.already_pressed:
+                    self.pedal_press()
+            if u'cl_output' in data:
+                self.last_cl_output = data[u'cl_output']
         if self.paused:
-            if data['cl_output']==10:
-                self.unpause()
+            if u'pedal' in data:
+                if data[u'pedal']==1:
+                    self.unpause()
         
     
     def on_keyboard_event(self):
@@ -293,7 +297,7 @@ class IntentionBeep(PygameFeedback):
         this_spot = self.spot_image[self.this_spot_index]
         #image_size = this_spot.get_size()
         image_size = [85,85]
-        self.screen.blit(this_spot,((self.screenSize[0]/2-image_size[0]/2),(self.screenSize[1]/2-image_size[1]/2)))
+        self.screen.blit(this_spot,((self.screen_center[0]-image_size[0]/2),(self.screen_center[1]-image_size[1]/2)))
 
 
     def render_text(self, text):

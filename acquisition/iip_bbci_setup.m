@@ -6,7 +6,7 @@ global opt
 bbci = struct;
 
 bbci.source.acquire_fcn = @bbci_acquire_bv;
-bbci.source.min_blocklength = 10;
+bbci.source.min_blocklength = 20;
 bbci.source.acquire_param = {struct('fs',opt.acq.fs,'filt_b',opt.acq.filt.b,'filt_a',opt.acq.filt.a)};
 
 % EEG
@@ -19,7 +19,7 @@ bbci.signal(2).clab = opt.cfy_acc.clab;
 
 % RP classifier
 bbci.feature(1).signal = 1;
-bbci.feature(1).proc= {{@proc_baseline,opt.cfy_rp.ival_baseln}, ...
+bbci.feature(1).proc= {{@proc_baseline,opt.cfy_rp.baseln_len,opt.cfy_rp.baseln_pos}, ...
                        {@proc_jumpingMeans,opt.cfy_rp.ival_fv}};
 bbci.feature(1).ival= [opt.cfy_rp.ival_fv(1) opt.cfy_rp.ival_fv(end)];
 
@@ -34,16 +34,16 @@ bbci.classifier(1).C = opt.cfy_rp.C;
 bbci.classifier(2).feature = 2;
 bbci.classifier(2).C = opt.cfy_acc.C;
 
-bbci.control(1).fcn = @rfb_bbci_control_button;
+bbci.control(1).fcn = @iip_bbci_control_button;
 bbci.control(1).condition.marker = opt.mrk.def{1,strcmp(opt.mrk.def(2,:),'pedal press')};
 bbci.control(1).param = {opt};
 
 bbci.control(2).classifier = 1;
-bbci.control(2).fcn = @rfb_bbci_control_cout;
+bbci.control(2).fcn = @iip_bbci_control_cout;
 bbci.control(2).param = {opt};
 
 bbci.control(3).classifier = 2;
-bbci.control(3).fcn = @rfb_bbci_control_onset;
+bbci.control(3).fcn = @iip_bbci_control_onset;
 bbci.control(3).param = {opt};
 
 bbci.feedback(1).control= 1;
